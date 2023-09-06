@@ -1,66 +1,45 @@
 package com.goit.hw.service;
 
 import com.goit.hw.entity.Note;
+import com.goit.hw.repository.NoteRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 @Service
 public class NoteService implements NoteServiceInterface {
-    private Map<Long, Note> noteMap = new HashMap<>();
+    private final NoteRepository noteRepository ;
+
+    public NoteService(NoteRepository noteRepository) {
+        this.noteRepository = noteRepository;
+    }
 
     //повертає список всіх нотаток
     @Override
     public List<Note> listAll() {
-        return List.copyOf(noteMap.values());
+        return noteRepository.findAll();
     }
 
-// додає нову нотатку, генеруючи для цієї нотатки унікальний (випадковий)
-// числовий ідентифікатор, повертає цю ж нотатку з
-// згенерованим ідентифікатором.
+    // додає нову нотатку
     @Override
     public Note add(Note note) {
-        long id = new Random().nextLong();
-        note.setId(id);
-        noteMap.put(id,note);
-        return note;
+        return noteRepository.save(note);
     }
 
-    //видаляє нотатку з вказаним ідентифікатором.
-    // Якщо нотатки з ідентифікатором немає - викидає виключення.
+    //шукає нотатку з вказаним ідентифікатором.
     @Override
     public Note getById(long id) {
-        if (noteMap.containsKey(id)){
-        Note note = noteMap.get(id);
-        return note;
-    }else {
-            throw new NullPointerException("This note was not found.");
-        }
+        return noteRepository.findById(id).orElse(null);
     }
 
-// шукає нотатку по note.id. Якщо нотатка є - оновлює для неї title та content.
-// Якщо нотатки немає - викидає виключення.
+// видаляє нотатку по note.id.
     @Override
     public void deleteById(long id) {
-        if (noteMap.containsKey(id)){
-            noteMap.remove(id);
-        }else {
-            throw new NullPointerException("This note was not found.");
-        }
+        noteRepository.deleteById(id);
     }
 
-//повертає нотатку по її ідентифікатору.
-// Якщо нотатки немає - викидає виключення.
     @Override
     public void update(Note note) {
-        if (noteMap.containsKey(note.getId())) {
-            noteMap.put(note.getId(),note);
-        } else {
-            throw new NullPointerException("This note was not found.");
-        }
+       noteRepository.save(note);
     }
-    
-}
+    }
